@@ -117,7 +117,11 @@
         "cpuid.coresPerSocket": "1"
       },
       "tools_upload_flavor": "linux",
-      "tools_upload_path": "/home/vagrant/{{.Flavor}}.iso"
+      "tools_upload_path": "/home/vagrant/{{.Flavor}}.iso",
+      "floppy_files": [
+        "floppy/vmware9.compat_mm.patch",
+        "floppy/vmware9.k3.8rc4.patch"
+      ]
     }
   ],
   "post-processors": [
