@@ -1,4 +1,10 @@
 {
+  "variables": {
+    "name_prefix": "bento-",
+    "platform": "ubuntu-13.04",
+    "iso_url": "http://releases.ubuntu.com/13.04/ubuntu-13.04-server-amd64.iso",
+    "iso_checksum": "7d335ca541fc4945b674459cde7bffb9"
+  },
   "provisioners": [
     {
       "type": "shell",
@@ -17,7 +23,7 @@
   ],
   "builders": [
     {
-      "name": "bento-ubuntu-13.04_virtualbox",
+      "name": "{{user `name_prefix`}}{{user `platform`}}_virtualbox",
       "type": "virtualbox",
       "boot_command": [
         "<esc><wait>",
@@ -47,9 +53,9 @@
       "disk_size": 40960,
       "guest_os_type": "Ubuntu_64",
       "http_directory": "http",
-      "iso_checksum": "7d335ca541fc4945b674459cde7bffb9",
+      "iso_checksum": "{{user `iso_checksum`}}",
       "iso_checksum_type": "md5",
-      "iso_url": "http://releases.ubuntu.com/13.04/ubuntu-13.04-server-amd64.iso",
+      "iso_url": "{{user `iso_url`}}",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
@@ -73,7 +79,7 @@
       ]
     },
     {
-      "name": "bento-ubuntu-13.04_vmware",
+      "name": "{{user `name_prefix`}}{{user `platform`}}_vmware",
       "type": "vmware",
       "boot_command": [
         "<esc><wait>",
@@ -103,9 +109,9 @@
       "disk_size": 40960,
       "guest_os_type": "ubuntu-64",
       "http_directory": "http",
-      "iso_checksum": "7d335ca541fc4945b674459cde7bffb9",
+      "iso_checksum": "{{user `iso_checksum`}}",
       "iso_checksum_type": "md5",
-      "iso_url": "http://releases.ubuntu.com/13.04/ubuntu-13.04-server-amd64.iso",
+      "iso_url": "{{user `iso_url`}}",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
@@ -127,7 +133,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "../builds/{{.BuildName}}.box"
+      "output": "../builds/{{.BuildName}}_{{timestamp}}.box"
     }
   ]
 }
