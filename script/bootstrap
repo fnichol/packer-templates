@@ -7,13 +7,15 @@ log()     { printf -- "       $*\n"; }
 warn()    { printf -- ">>>>>> $*\n"; }
 fail()    { printf -- "\nERROR: $*\n" ; exit 1 ; }
 
-banner "Checking for Packer"
+packer_min_version="0.3.1"
+
+banner "Checking for Packer (>= $packer_min_version)"
 if ! command -v packer >/dev/null ; then
   fail "An installation of Packer could not be found, please install a package"
 fi
 
-if [[ "$(packer --version)" < "Packer v0.2.3" ]] ; then
-  fail "Only Packer versions 0.2.3 and up are supported, please update"
+if [[ "$(packer --version)" < "Packer v$packer_min_version" ]] ; then
+  fail "Only Packer versions $packer_min_version and up are supported, please update"
 fi
 
 banner 'All ready!'
