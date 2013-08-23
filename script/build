@@ -19,7 +19,7 @@ class Options
 
     ENV['PACKER_CACHE_DIR'] = "../packer_cache"
 
-    parser = OptionParser.new do |opts|
+    OptionParser.new do |opts|
       opts.banner = "Usage: #{File.basename($0)} [options] TEMPLATE[ TEMPLATE ...]"
 
       opts.on("-n", "--[no-]dry-run", "Dry run (what would happen)") do |opt|
@@ -29,25 +29,13 @@ class Options
       opts.on("-d", "--[no-]debug", "Run packer with debug output") do |opt|
         options.debug = opt
       end
-
-      opts.on_tail("-h", "--help", "Show this help") do
-        puts opts
-        exit
-      end
-    end
-    parser.parse!(args)
+    end.parse!(args)
 
     options.templates = args unless args.empty?
 
     options.templates.each do |t|
-      file = "#{t}/template.json"
-      if !File.exists?(file)
-        $stderr.puts "File #{file} does not exist for template '#{t}'"
-        should_die = true
-      end
-      if should_die
-        $stderr.puts
-        $stderr.puts parser
+      if !File.exists?("#{t}/template.json")
+        $stderr.puts "File #{t}/template.json does not exist for template '#{t}'"
         exit(1)
       end
     end
@@ -58,27 +46,19 @@ end
 
 class Builder
 
-  attr_reader :options
+  attr_reader :templates, :dry_run, :debug
 
-  def self.start(options = Options.parse(ARGV))
-    new(options).start
-  end
-
-  def initialize(options)
-    @options = options
+  def initialize(opts)
+    @templates, @dry_run, @debug = opts.templates, opts.dry_run, opts.debug
   end
 
   def start
-    banner("Starting builder for templates: #{options.templates}")
+    banner("Starting builder for templates: #{templates}")
     time = Benchmark.measure do
-      options.templates.each do |template|
-        Dir.chdir(template) { packer(template) }
-      end
+      templates.each { |template| Dir.chdir(template) { packer(template) } }
     end
     banner("Builder finished in #{time.real} seconds.")
   end
-
-  private
 
   def packer(template)
     banner("[#{template}] Running: '#{packer_cmd.join(' ')}'")
@@ -90,8 +70,8 @@ class Builder
 
   def packer_cmd
     cmd = %w[packer build template.json]
-    cmd.insert(2, "--debug") if options.debug
-    cmd.insert(0, "echo") if options.dry_run
+    cmd.insert(2, "--debug") if debug
+    cmd.insert(0, "echo") if dry_run
     cmd
   end
 
@@ -101,7 +81,7 @@ class Builder
 end
 
 begin
-  Builder.start
+  Builder.new(Options.parse(ARGV)).start
 rescue => ex
   $stderr.puts ">>>>>>>> #{ex.message}"
   exit(($? && $?.exitstatus) || 99)
