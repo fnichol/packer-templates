@@ -1,3 +1,4 @@
+.DS_Store
 packer_cache/
 builds/*.box
 /*/output-*
