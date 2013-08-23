@@ -18,4 +18,9 @@ if [[ "$(packer --version)" < "Packer v$packer_min_version" ]] ; then
   fail "Only Packer versions $packer_min_version and up are supported, please update"
 fi
 
+banner "Checking for Ruby (>= 1.8)"
+if ! command -v ruby >/dev/null ; then
+  fail "Ruby not found on PATH and is required for script/build, please install"
+fi
+
 banner 'All ready!'
