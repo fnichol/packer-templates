@@ -1,0 +1,108 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+
+Signal.trap("INT") { exit 1 }
+
+$stdout.sync = true
+$stderr.sync = true
+
+require 'optparse'
+require 'ostruct'
+require 'benchmark'
+
+class Options
+
+  def self.parse(args)
+    options = OpenStruct.new
+    options.templates = Dir.glob("**/template.json").sort.
+      map { |file| File.dirname(file) }
+
+    ENV['PACKER_CACHE_DIR'] = "../packer_cache"
+
+    parser = OptionParser.new do |opts|
+      opts.banner = "Usage: #{File.basename($0)} [options] TEMPLATE[ TEMPLATE ...]"
+
+      opts.on("-n", "--[no-]dry-run", "Dry run (what would happen)") do |opt|
+        options.dry_run = opt
+      end
+
+      opts.on("-d", "--[no-]debug", "Run packer with debug output") do |opt|
+        options.debug = opt
+      end
+
+      opts.on_tail("-h", "--help", "Show this help") do
+        puts opts
+        exit
+      end
+    end
+    parser.parse!(args)
+
+    options.templates = args unless args.empty?
+
+    options.templates.each do |t|
+      file = "#{t}/template.json"
+      if !File.exists?(file)
+        $stderr.puts "File #{file} does not exist for template '#{t}'"
+        should_die = true
+      end
+      if should_die
+        $stderr.puts
+        $stderr.puts parser
+        exit(1)
+      end
+    end
+
+    options
+  end
+end
+
+class Builder
+
+  attr_reader :options
+
+  def self.start(options = Options.parse(ARGV))
+    new(options).start
+  end
+
+  def initialize(options)
+    @options = options
+  end
+
+  def start
+    banner("Starting builder for templates: #{options.templates}")
+    time = Benchmark.measure do
+      options.templates.each do |template|
+        Dir.chdir(template) { packer(template) }
+      end
+    end
+    banner("Builder finished in #{time.real} seconds.")
+  end
+
+  private
+
+  def packer(template)
+    banner("[#{template}] Running: '#{packer_cmd.join(' ')}'")
+    time = Benchmark.measure do
+      system(*packer_cmd) or raise "[#{template}] Error building, exited #{$?}"
+    end
+    banner("[#{template}] Finished in #{time.real} seconds.")
+  end
+
+  def packer_cmd
+    cmd = %w[packer build template.json]
+    cmd.insert(2, "--debug") if options.debug
+    cmd.insert(0, "echo") if options.dry_run
+    cmd
+  end
+
+  def banner(msg)
+    puts "-------> #{msg}"
+  end
+end
+
+begin
+  Builder.start
+rescue => ex
+  $stderr.puts ">>>>>>>> #{ex.message}"
+  exit(($? && $?.exitstatus) || 99)
+end
