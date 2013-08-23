@@ -23,7 +23,7 @@
   ],
   "builders": [
     {
-      "name": "{{user `name_prefix`}}{{user `platform`}}_virtualbox",
+      "name": "bento-ubuntu-13.04_virtualbox",
       "type": "virtualbox",
       "boot_command": [
         "<esc><wait>",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "name": "{{user `name_prefix`}}{{user `platform`}}_vmware",
+      "name": "bento-ubuntu-13.04_vmware",
       "type": "vmware",
       "boot_command": [
         "<esc><wait>",
@@ -133,7 +133,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "../builds/{{.BuildName}}_{{timestamp}}.box"
+      "output": "../builds/{{.BuildName}}.box"
     }
   ]
 }
