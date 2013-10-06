@@ -70,6 +70,7 @@ class Builder
 
   def packer_cmd
     cmd = %w[packer build template.json]
+    cmd.insert(2, "-var-file=variables.json") if File.exists?("variables.json")
     cmd.insert(2, "--debug") if debug
     cmd.insert(0, "echo") if dry_run
     cmd
