@@ -1,4 +1,1 @@
-#!/bin/bash -eux
-
-# eject installer disc
-drutil eject
+../../common/macosx/cleanup.sh

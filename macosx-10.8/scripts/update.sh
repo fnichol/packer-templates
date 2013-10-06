@@ -1,3 +1,1 @@
-#!/bin/bash -eux
-
-softwareupdate --install --all
+../../common/macosx/update.sh
