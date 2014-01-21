@@ -1,0 +1,1 @@
+../../common/macosx/cleanup.sh
