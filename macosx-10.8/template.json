@@ -35,7 +35,7 @@
   "builders": [
     {
       "name": "macosx-10.8_vmware",
-      "type": "vmware",
+      "type": "vmware-iso",
       "boot_wait": "2s",
       "disk_size": 20480,
       "guest_os_type": "darwin12-64",

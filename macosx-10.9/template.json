@@ -15,6 +15,7 @@
       "scripts": [
         "scripts/hostname.sh",
         "scripts/builder.sh",
+        "scripts/update.sh",
         "scripts/vagrant.sh",
         "scripts/cleanup.sh"
       ],
@@ -34,7 +35,7 @@
   "builders": [
     {
       "name": "macosx-10.9_vmware",
-      "type": "vmware",
+      "type": "vmware-iso",
       "boot_wait": "2s",
       "disk_size": 20480,
       "guest_os_type": "darwin12-64",
