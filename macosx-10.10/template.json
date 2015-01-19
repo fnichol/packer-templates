@@ -1,0 +1,73 @@
+{
+  "variables": {
+    "autologin_vagrant_user": "",
+    "iso_url": "",
+    "iso_checksum": ""
+  },
+  "provisioners": [
+    {
+      "type": "file",
+      "destination": "/private/tmp/kcpassword",
+      "source": "scripts/support/kcpassword"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/hostname.sh",
+        "scripts/builder.sh",
+        "scripts/update.sh",
+        "scripts/vagrant.sh",
+        "scripts/cleanup.sh"
+      ],
+      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "[ -z \"{{user `autologin_vagrant_user`}}\" ] && exit",
+        "echo \"Enabling automatic GUI login for the 'vagrant' user..\"",
+        "cp /private/tmp/kcpassword /private/etc/kcpassword",
+        "/usr/bin/defaults write /Library/Preferences/com.apple.loginwindow autoLoginUser vagrant"
+      ],
+      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
+    }
+  ],
+  "builders": [
+    {
+      "name": "macosx-10.10_vmware",
+      "type": "vmware-iso",
+      "boot_wait": "2s",
+      "disk_size": 20480,
+      "guest_os_type": "darwin12-64",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
+      "skip_compaction": true,
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "tools_upload_flavor": "darwin",
+      "tools_upload_path": "/Users/vagrant/{{.Flavor}}.iso",
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1",
+        "memsize": "2048",
+        "numvcpus": "1",
+        "firmware": "efi",
+        "keyboardAndMouseProfile": "macProfile",
+        "smc.present": "TRUE",
+        "hpet0.present": "TRUE",
+        "ich7m.present": "TRUE",
+        "ehci.present": "TRUE",
+        "usb.present": "TRUE"
+      }
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "../builds/{{.BuildName}}.box"
+    }
+  ]
+}
