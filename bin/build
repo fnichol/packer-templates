@@ -23,6 +23,10 @@ class Options
     OptionParser.new do |opts|
       opts.banner = "Usage: #{File.basename($0)} [options] TEMPLATE[ TEMPLATE ...]"
 
+      opts.on("-l", "--list", "List all templates in project") do |opt|
+        options.list = opt
+      end
+
       opts.on("-n", "--[no-]dry-run", "Dry run (what would happen)") do |opt|
         options.dry_run = opt
       end
@@ -51,16 +55,19 @@ end
 
 class Builder
 
-  attr_reader :templates, :dry_run, :debug, :builds
+  attr_reader :templates, :dry_run, :debug, :builds, :list
 
   def initialize(opts)
     @templates = opts.templates
     @dry_run = opts.dry_run
     @debug = opts.debug
     @builds = opts.builds
+    @list = opts.list
   end
 
   def start
+    return list_templates if list
+
     banner("Starting builder for templates: #{templates}")
     time = Benchmark.measure do
       templates.each { |template| packer(template) }
@@ -96,6 +103,10 @@ class Builder
     minutes = (total / 60).to_i
     seconds = (total - (minutes * 60))
     format("%dm%.2fs", minutes, seconds)
+  end
+
+  def list_templates
+    templates.each { |template| puts template }
   end
 end
 
