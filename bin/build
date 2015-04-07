@@ -58,7 +58,7 @@ class Builder
     time = Benchmark.measure do
       templates.each { |template| packer(template) }
     end
-    banner("Builder finished in #{time.real} seconds.")
+    banner("Builder finished in #{duration(time.real)}.")
   end
 
   def packer(template)
@@ -67,7 +67,7 @@ class Builder
     time = Benchmark.measure do
       system(*cmd) or raise "[#{template}] Error building, exited #{$?}"
     end
-    banner("[#{template}] Finished in #{time.real} seconds.")
+    banner("[#{template}] Finished in #{duration(time.real)}.")
   end
 
   def packer_cmd(template)
@@ -81,6 +81,13 @@ class Builder
 
   def banner(msg)
     puts "-------> #{msg}"
+  end
+
+  def duration(total)
+    total = 0 if total.nil?
+    minutes = (total / 60).to_i
+    seconds = (total - (minutes * 60))
+    format("%dm%.2fs", minutes, seconds)
   end
 end
 
