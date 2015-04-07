@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+
+require "rbconfig"
+
+PACKER_MIN_VERSION = "0.7.0"
+RUBY_MIN_VERSION = "1.9.2"
+
+def banner(msg); puts "-----> #{msg}"; end
+def info(msg); puts "       #{msg}"; end
+def fail(msg); abort "!!!!!! #{msg}"; end
+
+def capture!(cmd)
+  result = %x{#{cmd}}
+  code = $?.exitstatus
+  fail("Non-zero exit(#{code}) for: [#{cmd}]\n#{result}") if code != 0
+  result
+end
+
+banner("Checking for Packer (>= #{PACKER_MIN_VERSION})")
+begin
+  packer_version = capture!("packer version").strip.split.last.sub(/^v/, '')
+  info("Packer version #{packer_version} detected")
+  if Gem::Version.new(packer_version) < Gem::Version.new(PACKER_MIN_VERSION)
+    fail("Only Packer versions #{PACKER_MIN_VERSION} and up are supported, " \
+      "please update")
+  end
+rescue Errno::ENOENT
+  fail("An installation of Packer could not be found, please install a package")
+end
+
+banner "Checking for Ruby (>= #{RUBY_MIN_VERSION})"
+ruby_version = RbConfig::CONFIG["ruby_version"]
+info("Ruby version #{ruby_version} detected")
+if Gem::Version.new(ruby_version) < Gem::Version.new(RUBY_MIN_VERSION)
+  fail("Only Ruby versions #{RUBY_MIN_VERSION} and up are supported, " \
+    "please update")
+end
+
+banner("All ready!")
