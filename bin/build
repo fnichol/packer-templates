@@ -30,6 +30,10 @@ class Options
       opts.on("-d", "--[no-]debug", "Run packer with debug output") do |opt|
         options.debug = opt
       end
+
+      opts.on("-o BUILDS", "--only BUILDS", "Only build the given packer builds") do |opt|
+        options.builds = opt
+      end
     end.parse!(args)
 
     options.templates = args unless args.empty?
@@ -47,10 +51,13 @@ end
 
 class Builder
 
-  attr_reader :templates, :dry_run, :debug
+  attr_reader :templates, :dry_run, :debug, :builds
 
   def initialize(opts)
-    @templates, @dry_run, @debug = opts.templates, opts.dry_run, opts.debug
+    @templates = opts.templates
+    @dry_run = opts.dry_run
+    @debug = opts.debug
+    @builds = opts.builds
   end
 
   def start
@@ -74,6 +81,7 @@ class Builder
     vars = "#{template}_variables.json"
     cmd = %W[packer build #{template}.json]
     cmd.insert(2, "-var-file=#{vars}") if File.exist?(vars)
+    cmd.insert(2, "-only=#{builds}") if builds
     cmd.insert(2, "--debug") if debug
     cmd.insert(0, "echo") if dry_run
     cmd
