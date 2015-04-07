@@ -34,7 +34,6 @@
   ],
   "builders": [
     {
-      "name": "macosx-10.9_vmware",
       "type": "vmware-iso",
       "boot_wait": "2s",
       "disk_size": 20480,
@@ -67,7 +66,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "../builds/{{.BuildName}}.box"
+      "output": "../builds/fnichol_macosx-10.9+{{isotime \"20060102150405\"}}.{{.Provider}}.box"
     }
   ]
 }
