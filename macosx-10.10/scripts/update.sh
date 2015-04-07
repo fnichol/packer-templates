@@ -1,1 +1,0 @@
-../../common/macosx/update.sh

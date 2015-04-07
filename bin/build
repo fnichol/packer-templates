@@ -14,10 +14,11 @@ class Options
 
   def self.parse(args)
     options = OpenStruct.new
-    options.templates = Dir.glob("**/template.json").sort.
-      map { |file| File.dirname(file) }
+    options.templates = Dir.glob("*.json").sort.
+      delete_if { |file| file =~ /_variables\./ }.
+      map { |template| template.sub(/\.json$/, '') }
 
-    ENV['PACKER_CACHE_DIR'] = "../packer_cache"
+    ENV['PACKER_CACHE_DIR'] = "packer_cache"
 
     OptionParser.new do |opts|
       opts.banner = "Usage: #{File.basename($0)} [options] TEMPLATE[ TEMPLATE ...]"
@@ -34,8 +35,8 @@ class Options
     options.templates = args unless args.empty?
 
     options.templates.each do |t|
-      if !File.exists?("#{t}/template.json")
-        $stderr.puts "File #{t}/template.json does not exist for template '#{t}'"
+      if !File.exists?("#{t}.json")
+        $stderr.puts "File #{t}.json does not exist for template '#{t}'"
         exit(1)
       end
     end
@@ -55,22 +56,24 @@ class Builder
   def start
     banner("Starting builder for templates: #{templates}")
     time = Benchmark.measure do
-      templates.each { |template| Dir.chdir(template) { packer(template) } }
+      templates.each { |template| packer(template) }
     end
     banner("Builder finished in #{time.real} seconds.")
   end
 
   def packer(template)
-    banner("[#{template}] Running: '#{packer_cmd.join(' ')}'")
+    cmd = packer_cmd(template)
+    banner("[#{template}] Running: '#{cmd.join(' ')}'")
     time = Benchmark.measure do
-      system(*packer_cmd) or raise "[#{template}] Error building, exited #{$?}"
+      system(*cmd) or raise "[#{template}] Error building, exited #{$?}"
     end
     banner("[#{template}] Finished in #{time.real} seconds.")
   end
 
-  def packer_cmd
-    cmd = %w[packer build template.json]
-    cmd.insert(2, "-var-file=variables.json") if File.exists?("variables.json")
+  def packer_cmd(template)
+    vars = "#{template}_variables.json"
+    cmd = %W[packer build #{template}.json]
+    cmd.insert(2, "-var-file=#{vars}") if File.exist?(vars)
     cmd.insert(2, "--debug") if debug
     cmd.insert(0, "echo") if dry_run
     cmd

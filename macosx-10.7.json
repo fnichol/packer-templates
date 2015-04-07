@@ -1,23 +1,24 @@
 {
+  "min_packer_version": "0.7.0",
   "variables": {
     "autologin_vagrant_user": "",
-    "iso_url": "",
-    "iso_checksum": ""
+    "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry",
+    "iso_checksum": "nopenopenope"
   },
   "provisioners": [
     {
       "type": "file",
       "destination": "/private/tmp/kcpassword",
-      "source": "scripts/support/kcpassword"
+      "source": "scripts/macosx/support/kcpassword"
     },
     {
       "type": "shell",
       "scripts": [
-        "scripts/hostname.sh",
-        "scripts/builder.sh",
-        "scripts/update.sh",
-        "scripts/vagrant.sh",
-        "scripts/cleanup.sh"
+        "scripts/macosx/hostname.sh",
+        "scripts/macosx/builder.sh",
+        "scripts/macosx/update.sh",
+        "scripts/macosx/vagrant.sh",
+        "scripts/macosx/cleanup.sh"
       ],
       "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
     },
@@ -66,7 +67,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "../builds/fnichol_macosx-10.8+{{isotime \"20060102150405\"}}.{{.Provider}}.box"
+      "output": "builds/fnichol_macosx-10.7+{{isotime \"20060102150405\"}}.{{.Provider}}.box"
     }
   ]
 }
