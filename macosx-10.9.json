@@ -15,10 +15,12 @@
       "type": "shell",
       "scripts": [
         "scripts/macosx/hostname.sh",
-        "scripts/macosx/builder.sh",
         "scripts/macosx/update.sh",
+        "scripts/macosx/networking.sh",
         "scripts/macosx/vagrant.sh",
-        "scripts/macosx/cleanup.sh"
+        "scripts/macosx/vmtools.sh",
+        "scripts/macosx/cleanup.sh",
+        "scripts/macosx/minimize.sh"
       ],
       "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
     },
@@ -52,7 +54,7 @@
       "tools_upload_path": "/Users/vagrant/{{.Flavor}}.iso",
       "vmx_data": {
         "cpuid.coresPerSocket": "1",
-        "memsize": "2048",
+        "memsize": "3072",
         "numvcpus": "1",
         "firmware": "efi",
         "keyboardAndMouseProfile": "macProfile",
@@ -67,6 +69,7 @@
   "post-processors": [
     {
       "type": "vagrant",
+      "vagrantfile_template": "vagrantfile_templates/macosx.rb",
       "output": "builds/fnichol_macosx-10.9+{{isotime \"20060102150405\"}}.{{.Provider}}.box"
     }
   ]

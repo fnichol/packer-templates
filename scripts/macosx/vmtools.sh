@@ -2,11 +2,13 @@
 
 home_dir="$(python -c 'import pwd; print pwd.getpwnam("vagrant").pw_dir')"
 
-if [ -f $home_dir/.vbox_version ]; then
-    echo "VirtualBox not currently supported, sadface"
-fi
+case "$PACKER_BUILDER_TYPE" in
 
-if [ -f $home_dir/.vmfusion_version ]; then
+virtualbox-iso|virtualbox-ovf)
+    echo "VirtualBox not currently supported, sadface"
+    ;;
+
+vmware-iso|vmware-vmx)
     iso_name="$(uname | tr [[:upper:]] [[:lower:]]).iso"
     mount_point="$(mktemp -d /tmp/vmware-tools.XXXX)"
     #Run install, unmount ISO and remove it
@@ -22,17 +24,14 @@ if [ -f $home_dir/.vmfusion_version ]; then
     # useful for the Hashicorp vmware_fusion Vagrant provider plugin
     mkdir /mnt
     ln -sf /Volumes/VMware\ Shared\ Folders /mnt/hgfs
-fi
+    ;;
 
-pubkey_url='https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub'
-mkdir $home_dir/.ssh
-if command -v wget >/dev/null ; then
-    wget --no-check-certificate "$pubkey_url" -O $home_dir/.ssh/authorized_keys
-elif command -v curl >/dev/null ; then
-    curl --insecure --location "$pubkey_url" > $home_dir/.ssh/authorized_keys
-else
-    echo "Cannot download vagrant public key"
-    exit 1
-fi
-chown -R vagrant $home_dir/.ssh
-chmod -R go-rwsx $home_dir/.ssh
+parallels-iso|parallels-pvm)
+    echo "Parallels not currently supported, sadface"
+    ;;
+
+*)
+    echo "Unknown Packer Builder Type >>$PACKER_BUILDER_TYPE<< selected."
+    echo "Known are virtualbox-iso|virtualbox-ovf|vmware-iso|vmware-vmx|parallels-iso|parallels-pvm."
+    ;;
+esac
