@@ -1,18 +1,51 @@
 {
+  "builders": [
+    {
+      "boot_wait": "2s",
+      "disk_size": 20480,
+      "guest_os_type": "darwin12-64",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "md5",
+      "iso_url": "{{user `iso_url`}}",
+      "skip_compaction": true,
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "tools_upload_flavor": "darwin",
+      "tools_upload_path": "/Users/vagrant/{{.Flavor}}.iso",
+      "type": "vmware-iso",
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1",
+        "ehci.present": "TRUE",
+        "firmware": "efi",
+        "hpet0.present": "TRUE",
+        "ich7m.present": "TRUE",
+        "keyboardAndMouseProfile": "macProfile",
+        "memsize": "3072",
+        "numvcpus": "1",
+        "smc.present": "TRUE",
+        "usb.present": "TRUE"
+      }
+    }
+  ],
   "min_packer_version": "0.7.0",
-  "variables": {
-    "autologin_vagrant_user": "",
-    "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry",
-    "iso_checksum": "nopenopenope"
-  },
+  "post-processors": [
+    {
+      "output": "builds/fnichol_macosx-10.8+{{isotime \"20060102150405\"}}.{{.Provider}}.box",
+      "type": "vagrant",
+      "vagrantfile_template": "vagrantfile_templates/macosx.rb"
+    }
+  ],
   "provisioners": [
     {
-      "type": "file",
       "destination": "/private/tmp/kcpassword",
-      "source": "scripts/macosx/support/kcpassword"
+      "source": "scripts/macosx/support/kcpassword",
+      "type": "file"
     },
     {
-      "type": "shell",
+      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'",
       "scripts": [
         "scripts/macosx/hostname.sh",
         "scripts/macosx/update.sh",
@@ -22,55 +55,23 @@
         "scripts/macosx/cleanup.sh",
         "scripts/macosx/minimize.sh"
       ],
-      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
+      "type": "shell"
     },
     {
-      "type": "shell",
+      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'",
       "inline": [
         "[ -z \"{{user `autologin_vagrant_user`}}\" ] && exit",
         "echo \"Enabling automatic GUI login for the 'vagrant' user..\"",
         "cp /private/tmp/kcpassword /private/etc/kcpassword",
         "/usr/bin/defaults write /Library/Preferences/com.apple.loginwindow autoLoginUser vagrant"
       ],
-      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'"
+      "type": "shell"
     }
   ],
-  "builders": [
-    {
-      "type": "vmware-iso",
-      "boot_wait": "2s",
-      "disk_size": 20480,
-      "guest_os_type": "darwin12-64",
-      "iso_checksum": "{{user `iso_checksum`}}",
-      "iso_checksum_type": "md5",
-      "iso_url": "{{user `iso_url`}}",
-      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
-      "skip_compaction": true,
-      "ssh_password": "vagrant",
-      "ssh_port": 22,
-      "ssh_username": "vagrant",
-      "ssh_wait_timeout": "10000s",
-      "tools_upload_flavor": "darwin",
-      "tools_upload_path": "/Users/vagrant/{{.Flavor}}.iso",
-      "vmx_data": {
-        "cpuid.coresPerSocket": "1",
-        "memsize": "3072",
-        "numvcpus": "1",
-        "firmware": "efi",
-        "keyboardAndMouseProfile": "macProfile",
-        "smc.present": "TRUE",
-        "hpet0.present": "TRUE",
-        "ich7m.present": "TRUE",
-        "ehci.present": "TRUE",
-        "usb.present": "TRUE"
-      }
-    }
-  ],
-  "post-processors": [
-    {
-      "type": "vagrant",
-      "vagrantfile_template": "vagrantfile_templates/macosx.rb",
-      "output": "builds/fnichol_macosx-10.8+{{isotime \"20060102150405\"}}.{{.Provider}}.box"
-    }
-  ]
+  "variables": {
+    "autologin_vagrant_user": "",
+    "git_sha": "unset",
+    "iso_checksum": "nopenopenope",
+    "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry"
+  }
 }
