@@ -1,0 +1,137 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "S<enter>",
+        "cat <<INSTALL_CONF >install.conf<enter>",
+        "System hostname = {{user `hostname`}}<enter>",
+        "Password for root = vagrant<enter>",
+        "Do you expect to run the X Window System = no<enter>",
+        "Setup a user = vagrant<enter>",
+        "Password for user = vagrant<enter>",
+        "What timezone are you in = UTC<enter>",
+        "Location of sets = http<enter>",
+        "HTTP proxy URL = {{user `http_proxy`}}<enter>",
+        "HTTP server = {{user `mirror_server`}}<enter>",
+        "Server directory = {{user `mirror_directory`}}<enter>",
+        "Set name(s) = -game*.tgz -x*.tgz<enter>",
+        "INSTALL_CONF<enter>",
+        "cat <<INSTALL >install.sh<enter>",
+        "install -af install.conf;<enter>",
+        "echo '' >>/mnt/etc/sudoers;<enter>",
+        "echo '# Passwordless sudo for Vagrant user' >>/mnt/etc/sudoers;<enter>",
+        "echo 'vagrant ALL=(ALL) NOPASSWD: SETENV: ALL' >>/mnt/etc/sudoers;<enter>",
+        "reboot;<enter>",
+        "INSTALL<enter>",
+        "sh -eux install.sh<enter>"
+      ],
+      "boot_wait": "20s",
+      "disk_size": 40960,
+      "guest_additions_mode": "disable",
+      "guest_os_type": "OpenBSD_64",
+      "iso_checksum": "99623a7a8c2fd26d8058a6c5b873b4e271ca97a2e8f0897209c53fea0c741b63",
+      "iso_checksum_type": "sha256",
+      "iso_url": "http://{{user `mirror_server`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "output_directory": "packer-{{user `name`}}-virtualbox",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "type": "virtualbox-iso",
+      "vm_name": "packer-{{user `name`}}",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "384" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "1" ]
+      ],
+      "virtualbox_version_file": ".vbox_version"
+    },
+    {
+      "boot_command": [
+        "S<enter>",
+        "cat <<INSTALL_CONF >install.conf<enter>",
+        "System hostname = {{user `hostname`}}<enter>",
+        "Password for root = vagrant<enter>",
+        "Do you expect to run the X Window System = no<enter>",
+        "Setup a user = vagrant<enter>",
+        "Password for user = vagrant<enter>",
+        "What timezone are you in = UTC<enter>",
+        "Location of sets = http<enter>",
+        "HTTP proxy URL = {{user `http_proxy`}}<enter>",
+        "HTTP server = {{user `mirror_server`}}<enter>",
+        "Server directory = {{user `mirror_directory`}}<enter>",
+        "Set name(s) = -game*.tgz -x*.tgz<enter>",
+        "INSTALL_CONF<enter>",
+        "cat <<INSTALL >install.sh<enter>",
+        "install -af install.conf;<enter>",
+        "echo '' >>/mnt/etc/sudoers;<enter>",
+        "echo '# Passwordless sudo for Vagrant user' >>/mnt/etc/sudoers;<enter>",
+        "echo 'vagrant ALL=(ALL) NOPASSWD: SETENV: ALL' >>/mnt/etc/sudoers;<enter>",
+        "reboot;<enter>",
+        "INSTALL<enter>",
+        "sh -eux install.sh<enter>"
+      ],
+      "boot_wait": "20s",
+      "disk_size": 40960,
+      "guest_os_type": "other-64",
+      "iso_checksum": "99623a7a8c2fd26d8058a6c5b873b4e271ca97a2e8f0897209c53fea0c741b63",
+      "iso_checksum_type": "sha256",
+      "iso_url": "http://{{user `mirror_server`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "output_directory": "packer-{{user `name`}}-vmware",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "type": "vmware-iso",
+      "vm_name": "packer-{{user `name`}}",
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1",
+        "memsize": "384",
+        "numvcpus": "1"
+      }
+    }
+  ],
+  "min_packer_version": "0.7.0",
+  "post-processors": [
+    {
+      "output": "builds/{{user `user_prefix`}}__{{user `name`}}-{{user `version`}}+{{user `timestamp`}}.git.{{user `git_sha`}}.{{.Provider}}.box",
+      "type": "vagrant",
+      "vagrantfile_template": "vagrantfile_templates/openbsd.rb"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "ftp_proxy={{user `ftp_proxy`}}",
+        "HOME_DIR={{user `home_dir`}}",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "MIRROR=http://{{user `mirror_server`}}/{{user `mirror_directory`}}",
+        "VAGRANT_BOX={{user `user_prefix`}}/{{user `name`}},{{user `version`}}+{{user `timestamp`}}.git.{{user `git_sha`}}"
+      ],
+      "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "scripts": [
+        "scripts/openbsd/nfsd.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "ftp_proxy": "{{env `ftp_proxy`}}",
+    "git_sha": "unset",
+    "home_dir": "/home/vagrant",
+    "hostname": "openbsd-56",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "iso_name": "cd56.iso",
+    "mirror_server": "ftp.openbsd.org",
+    "mirror_directory": "pub/OpenBSD/5.6/amd64",
+    "name": "openbsd-5.6-amd64",
+    "timestamp": "{{isotime \"20060102150405\"}}",
+    "user_prefix": "fnichol",
+    "version": "1.0.0.beta.1"
+  }
+}
