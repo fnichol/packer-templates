@@ -86,7 +86,7 @@ class Builder
 
   def packer_cmd(template)
     vars = "#{template}_variables.json"
-    cmd = %W[packer build #{template}.json]
+    cmd = %W[packer build -var git_sha=#{git_sha} #{template}.json]
     cmd.insert(2, "-var-file=#{vars}") if File.exist?(vars)
     cmd.insert(2, "-only=#{builds}") if builds
     cmd.insert(2, "--debug") if debug
@@ -107,6 +107,10 @@ class Builder
 
   def list_templates
     templates.each { |template| puts template }
+  end
+
+  def git_sha
+    %x{git rev-parse --short HEAD}.strip
   end
 end
 
