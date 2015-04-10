@@ -89,6 +89,6 @@
     "name": "macosx-10.9",
     "timestamp": "{{isotime \"20060102150405\"}}",
     "user_prefix": "fnichol",
-    "version": "1.1.0"
+    "version": "1.1.1.dev"
   }
 }
