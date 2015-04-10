@@ -1,6 +1,4 @@
-#!/bin/bash -eux
-
-rm -f "$(uname | tr [[:upper:]] [[:lower:]]).iso"
+#!/bin/sh -eux
 
 # eject installer disc
-drutil eject
+drutil eject;

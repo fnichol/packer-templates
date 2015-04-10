@@ -7,6 +7,7 @@
       "iso_checksum": "{{user `iso_checksum`}}",
       "iso_checksum_type": "md5",
       "iso_url": "{{user `iso_url`}}",
+      "output_directory": "packer-{{user `name`}}-vmware",
       "skip_compaction": true,
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
       "ssh_password": "vagrant",
@@ -14,8 +15,9 @@
       "ssh_username": "vagrant",
       "ssh_wait_timeout": "10000s",
       "tools_upload_flavor": "darwin",
-      "tools_upload_path": "/Users/vagrant/{{.Flavor}}.iso",
+      "tools_upload_path": "/tmp/vmtools.iso",
       "type": "vmware-iso",
+      "vm_name": "packer-{{user `name`}}",
       "vmx_data": {
         "cpuid.coresPerSocket": "1",
         "ehci.present": "TRUE",
@@ -33,7 +35,7 @@
   "min_packer_version": "0.7.0",
   "post-processors": [
     {
-      "output": "builds/fnichol_macosx-10.9+{{isotime \"20060102150405\"}}.{{.Provider}}.box",
+      "output": "builds/{{user `user_prefix`}}__{{user `name`}}-{{user `version`}}+{{user `timestamp`}}.git.{{user `git_sha`}}.{{.Provider}}.box",
       "type": "vagrant",
       "vagrantfile_template": "vagrantfile_templates/macosx.rb"
     }
@@ -45,12 +47,19 @@
       "type": "file"
     },
     {
-      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'",
+      "environment_vars": [
+        "ftp_proxy={{user `ftp_proxy`}}",
+        "HOME_DIR={{user `home_dir`}}",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "VAGRANT_BOX={{user `user_prefix`}}/{{user `name`}},{{user `version`}}+{{user `timestamp`}}.git.{{user `git_sha`}}"
+      ],
+      "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
       "scripts": [
         "scripts/macosx/hostname.sh",
         "scripts/macosx/update.sh",
         "scripts/macosx/networking.sh",
-        "scripts/macosx/vagrant.sh",
+        "scripts/common/vagrant.sh",
         "scripts/macosx/vmtools.sh",
         "scripts/macosx/cleanup.sh",
         "scripts/macosx/minimize.sh"
@@ -58,7 +67,7 @@
       "type": "shell"
     },
     {
-      "execute_command": "echo 'vagrant'| {{.Vars}} sudo -E -S sh '{{.Path}}'",
+      "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
       "inline": [
         "[ -z \"{{user `autologin_vagrant_user`}}\" ] && exit",
         "echo \"Enabling automatic GUI login for the 'vagrant' user..\"",
@@ -70,8 +79,16 @@
   ],
   "variables": {
     "autologin_vagrant_user": "",
+    "ftp_proxy": "{{env `ftp_proxy`}}",
     "git_sha": "unset",
+    "home_dir": "/Users/vagrant",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
     "iso_checksum": "nopenopenope",
-    "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry"
+    "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry",
+    "name": "macosx-10.9",
+    "timestamp": "{{isotime \"20060102150405\"}}",
+    "user_prefix": "fnichol",
+    "version": "1.0.0.beta.1"
   }
 }
