@@ -132,6 +132,6 @@
     "name": "openbsd-5.6-i386",
     "timestamp": "{{isotime \"20060102150405\"}}",
     "user_prefix": "fnichol",
-    "version": "1.1.1.dev"
+    "version": "1.2.0"
   }
 }
