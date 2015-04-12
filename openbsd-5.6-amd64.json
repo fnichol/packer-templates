@@ -132,6 +132,6 @@
     "name": "openbsd-5.6-amd64",
     "timestamp": "{{isotime \"20060102150405\"}}",
     "user_prefix": "fnichol",
-    "version": "1.2.0"
+    "version": "1.2.1.dev"
   }
 }
