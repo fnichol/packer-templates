@@ -52,6 +52,7 @@
         "HOME_DIR={{user `home_dir`}}",
         "http_proxy={{user `http_proxy`}}",
         "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}",
         "VAGRANT_BOX={{user `user_prefix`}}/{{user `name`}},{{user `version`}}+{{user `timestamp`}}.git.{{user `git_sha`}}"
       ],
       "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
@@ -87,6 +88,7 @@
     "iso_checksum": "nopenopenope",
     "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry",
     "name": "macosx-10.10",
+    "no_proxy": "{{env `no_proxy`}}",
     "timestamp": "{{isotime \"20060102150405\"}}",
     "user_prefix": "fnichol",
     "version": "1.1.1.dev"
