@@ -2,4 +2,4 @@
 packer_cache/
 builds/*.box
 /packer-*/
-*_variables.json
+*.variables.json

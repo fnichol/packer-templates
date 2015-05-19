@@ -17,7 +17,7 @@ class Options
   def self.parse(args)
     options = OpenStruct.new
     options.templates = Dir.glob("*.json").sort.
-      delete_if { |file| file =~ /_variables\./ }.
+      delete_if { |file| file =~ /\.variables\./ }.
       map { |template| template.sub(/\.json$/, '') }
 
     ENV['PACKER_CACHE_DIR'] = "packer_cache"
