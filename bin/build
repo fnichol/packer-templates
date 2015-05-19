@@ -12,6 +12,8 @@ require 'benchmark'
 
 class Options
 
+  NAME = File.basename($0).freeze
+
   def self.parse(args)
     options = OpenStruct.new
     options.templates = Dir.glob("*.json").sort.
@@ -20,59 +22,116 @@ class Options
 
     ENV['PACKER_CACHE_DIR'] = "packer_cache"
 
-    OptionParser.new do |opts|
-      opts.banner = "Usage: #{File.basename($0)} [options] TEMPLATE[ TEMPLATE ...]"
-
-      opts.on("-l", "--list", "List all templates in project") do |opt|
-        options.list = opt
-      end
-
-      opts.on("-n", "--[no-]dry-run", "Dry run (what would happen)") do |opt|
-        options.dry_run = opt
-      end
-
-      opts.on("-d", "--[no-]debug", "Run packer with debug output") do |opt|
-        options.debug = opt
-      end
-
-      opts.on("-o BUILDS", "--only BUILDS", "Only build the given packer builds") do |opt|
-        options.builds = opt
-      end
-    end.parse!(args)
-
-    options.templates = args unless args.empty?
-
-    options.templates.each do |t|
-      if !File.exists?("#{t}.json")
-        $stderr.puts "File #{t}.json does not exist for template '#{t}'"
-        exit(1)
-      end
+    global = OptionParser.new do |opts|
+      opts.banner = "Usage: #{NAME} [SUBCOMMAND [options]]"
+      opts.separator ""
+      opts.separator <<-COMMANDS.gsub(/^ {8}/, "")
+        build :   build one or more templates
+        fix   :   fix one or more templates
+        help  :   prints this help message
+        list  :   list all templates in project
+      COMMANDS
     end
+
+    templates_argv_proc = proc { |options|
+      options.templates = args unless args.empty?
+
+      options.templates.each do |t|
+        if !File.exists?("#{t}.json")
+          $stderr.puts "File #{t}.json does not exist for template '#{t}'"
+          exit(1)
+        end
+      end
+    }
+
+    subcommand = {
+      help: {
+        parser: OptionParser.new {},
+        argv: proc { |options|
+          puts global
+          exit(0)
+        }
+      },
+      build: {
+        class: BuildRunner,
+        parser: OptionParser.new { |opts|
+          opts.banner = "Usage: #{NAME} build [options] TEMPLATE[ TEMPLATE ...]"
+
+          opts.on("-n", "--[no-]dry-run", "Dry run (what would happen)") do |opt|
+            options.dry_run = opt
+          end
+
+          opts.on("-d", "--[no-]debug", "Run packer with debug output") do |opt|
+            options.debug = opt
+          end
+
+          opts.on("-o BUILDS", "--only BUILDS", "Only build some Packer builds") do |opt|
+            options.builds = opt
+          end
+        },
+        argv: templates_argv_proc
+      },
+      fix: {
+        class: FixRunner,
+        parser: OptionParser.new { |opts|
+          opts.banner = "Usage: #{NAME} fix TEMPLATE[ TEMPLATE ...]"
+        },
+        argv: templates_argv_proc
+      },
+      list: {
+        class: ListRunner,
+        parser: OptionParser.new { |opts|
+          opts.banner = "Usage: #{NAME} list"
+        },
+        argv: proc {}
+      }
+    }
+
+    global.order!
+    command = args.empty? ? :help : ARGV.shift.to_sym
+    subcommand.fetch(command).fetch(:parser).order!
+    subcommand.fetch(command).fetch(:argv).call(options)
+
+    options.command = command
+    options.klass = subcommand.fetch(command).fetch(:class)
 
     options
   end
 end
 
-class Builder
+module Common
 
-  attr_reader :templates, :dry_run, :debug, :builds, :list
+  def banner(msg)
+    puts "==> #{msg}"
+  end
+
+  def duration(total)
+    total = 0 if total.nil?
+    minutes = (total / 60).to_i
+    seconds = (total - (minutes * 60))
+    format("%dm%.2fs", minutes, seconds)
+  end
+end
+
+class BuildRunner
+
+  include Common
+
+  attr_reader :templates, :dry_run, :debug, :builds
 
   def initialize(opts)
     @templates = opts.templates
     @dry_run = opts.dry_run
     @debug = opts.debug
     @builds = opts.builds
-    @list = opts.list
   end
 
   def start
-    return list_templates if list
-
-    banner("Starting builder for templates: #{templates}")
+    banner("Starting build for templates: #{templates}")
     time = Benchmark.measure do
       templates.each { |template| packer(template) }
     end
-    banner("Builder finished in #{duration(time.real)}.")
+    banner("Build finished in #{duration(time.real)}.")
   end
 
   def packer(template)
@@ -89,24 +148,9 @@ class Builder
     cmd = %W[packer build -var git_sha=#{git_sha} #{template}.json]
     cmd.insert(2, "-var-file=#{vars}") if File.exist?(vars)
     cmd.insert(2, "-only=#{builds}") if builds
-    cmd.insert(2, "--debug") if debug
+    cmd.insert(2, "-debug") if debug
     cmd.insert(0, "echo") if dry_run
     cmd
-  end
-
-  def banner(msg)
-    puts "-------> #{msg}"
-  end
-
-  def duration(total)
-    total = 0 if total.nil?
-    minutes = (total / 60).to_i
-    seconds = (total - (minutes * 60))
-    format("%dm%.2fs", minutes, seconds)
-  end
-
-  def list_templates
-    templates.each { |template| puts template }
   end
 
   def git_sha
@@ -114,9 +158,62 @@ class Builder
   end
 end
 
+class FixRunner
+
+  include Common
+
+  attr_reader :templates
+
+  def initialize(opts)
+    @templates = opts.templates
+  end
+
+  def start
+    banner("Fixing for templates: #{templates}")
+    time = Benchmark.measure do
+      templates.each { |template| fix(template) }
+    end
+    banner("Fixing finished in #{duration(time.real)}.")
+  end
+
+  def fix(template)
+    output = %x{packer fix #{template}.json}
+    raise "[#{template}] Error fixing, exited #{$?}" if $?.exitstatus != 0
+    File.open("#{template}.json", "wb") { |file| file.write(output) }
+  end
+end
+
+class ListRunner
+
+  include Common
+
+  attr_reader :templates
+
+  def initialize(opts)
+    @templates = opts.templates
+  end
+
+  def start
+    templates.each { |template| puts template }
+  end
+end
+
+class Runner
+
+  attr_reader :options
+
+  def initialize(options)
+    @options = options
+  end
+
+  def start
+    options.klass.new(options).start
+  end
+end
+
 begin
-  Builder.new(Options.parse(ARGV)).start
+  Runner.new(Options.parse(ARGV)).start
 rescue => ex
-  $stderr.puts ">>>>>>>> #{ex.message}"
+  $stderr.puts ">>> #{ex.message}"
   exit(($? && $?.exitstatus) || 99)
 end
