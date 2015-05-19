@@ -14,11 +14,17 @@ class Options
 
   NAME = File.basename($0).freeze
 
-  def self.parse(args)
-    options = OpenStruct.new
-    options.templates = Dir.glob("*.json").sort.
+  def self.calculate_templates(globs)
+    Array(globs).map { |glob| Dir.glob(glob) }.
+      flatten.
+      sort.
       delete_if { |file| file =~ /\.variables\./ }.
       map { |template| template.sub(/\.json$/, '') }
+  end
+
+  def self.parse(args)
+    options = OpenStruct.new
+    options.templates = calculate_templates("*.json")
 
     ENV['PACKER_CACHE_DIR'] = "packer_cache"
 
@@ -34,7 +40,7 @@ class Options
     end
 
     templates_argv_proc = proc { |options|
-      options.templates = args unless args.empty?
+      options.templates = calculate_templates(args) unless args.empty?
 
       options.templates.each do |t|
         if !File.exists?("#{t}.json")
@@ -81,9 +87,9 @@ class Options
       list: {
         class: ListRunner,
         parser: OptionParser.new { |opts|
-          opts.banner = "Usage: #{NAME} list"
+          opts.banner = "Usage: #{NAME} list [TEMPLATE ...]"
         },
-        argv: proc {}
+        argv: templates_argv_proc
       }
     }
 
