@@ -14,14 +14,6 @@ class Options
 
   NAME = File.basename($0).freeze
 
-  def self.calculate_templates(globs)
-    Array(globs).map { |glob| Dir.glob(glob) }.
-      flatten.
-      sort.
-      delete_if { |file| file =~ /\.variables\./ }.
-      map { |template| template.sub(/\.json$/, '') }
-  end
-
   def self.parse(args)
     options = OpenStruct.new
     options.templates = calculate_templates("*.json")
@@ -103,6 +95,15 @@ class Options
 
     options
   end
+
+  def self.calculate_templates(globs)
+    Array(globs).
+      map { |glob| result = Dir.glob(glob); result.empty? ? glob : result }.
+      flatten.
+      sort.
+      delete_if { |file| file =~ /\.variables\./ }.
+      map { |template| template.sub(/\.json$/, '') }
+  end
 end
 
 module Common
@@ -150,7 +151,7 @@ class BuildRunner
   end
 
   def packer_cmd(template)
-    vars = "#{template}_variables.json"
+    vars = "#{template}.variables.json"
     cmd = %W[packer build -var git_sha=#{git_sha} #{template}.json]
     cmd.insert(2, "-var-file=#{vars}") if File.exist?(vars)
     cmd.insert(2, "-only=#{builds}") if builds
