@@ -18,7 +18,7 @@
         "INSTALL_CONF<enter>",
         "cat <<INSTALL >install.sh<enter>",
         "install -af install.conf;<enter>",
-        "echo 'permit nopass keepenv { PKG_PATH ENV PS1 SSH_AUTH_SOCK } :wheel' >>/mnt/etc/doas.conf;<enter>",
+        "echo 'permit nopass keepenv :wheel' >>/mnt/etc/doas.conf;<enter>",
         "reboot;<enter>",
         "INSTALL<enter>",
         "sh -eux install.sh<enter>"
@@ -62,7 +62,7 @@
         "INSTALL_CONF<enter>",
         "cat <<INSTALL >install.sh<enter>",
         "install -af install.conf;<enter>",
-        "echo 'permit nopass keepenv { PKG_PATH ENV PS1 SSH_AUTH_SOCK } :wheel' >>/mnt/etc/doas.conf;<enter>",
+        "echo 'permit nopass keepenv :wheel' >>/mnt/etc/doas.conf;<enter>",
         "reboot;<enter>",
         "INSTALL<enter>",
         "sh -eux install.sh<enter>"
@@ -110,6 +110,7 @@
       "execute_command": "doas env {{.Vars}} sh -eux '{{.Path}}'",
       "scripts": [
         "scripts/openbsd/nfsd.sh",
+        "scripts/openbsd/rsync.sh",
         "scripts/common/vagrant.sh",
         "scripts/common/minimize.sh"
       ],
@@ -131,6 +132,6 @@
     "no_proxy": "{{env `no_proxy`}}",
     "timestamp": "{{isotime \"20060102150405\"}}",
     "user_prefix": "fnichol",
-    "version": "1.2.0"
+    "version": "1.3.0"
   }
 }
