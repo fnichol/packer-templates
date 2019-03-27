@@ -37,12 +37,22 @@
       "ssh_username": "vagrant",
       "ssh_wait_timeout": "10000s",
       "type": "virtualbox-iso",
-      "vm_name": "packer-{{user `name`}}",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", "384" ],
-        [ "modifyvm", "{{.Name}}", "--cpus", "2" ]
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "384"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ]
       ],
-      "virtualbox_version_file": ".vbox_version"
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-{{user `name`}}"
     },
     {
       "boot_command": [
@@ -126,8 +136,8 @@
     "https_proxy": "{{env `https_proxy`}}",
     "iso_checksum": "fe1006fb002cb14e561cddf910ba57e0f785c47ff6b04818b0767373b3145e6e",
     "iso_name": "cd60.iso",
-    "mirror_server": "ftp.openbsd.org",
     "mirror_directory": "pub/OpenBSD/6.0/amd64",
+    "mirror_server": "ftp.openbsd.org",
     "name": "openbsd-6.0-amd64",
     "no_proxy": "{{env `no_proxy`}}",
     "timestamp": "{{isotime \"20060102150405\"}}",
@@ -135,3 +145,4 @@
     "version": "1.3.0"
   }
 }
+

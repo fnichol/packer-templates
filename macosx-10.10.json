@@ -8,8 +8,8 @@
       "iso_checksum_type": "md5",
       "iso_url": "{{user `iso_url`}}",
       "output_directory": "packer-{{user `name`}}-vmware",
-      "skip_compaction": true,
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
+      "skip_compaction": true,
       "ssh_password": "vagrant",
       "ssh_port": 22,
       "ssh_username": "vagrant",
@@ -70,7 +70,7 @@
     {
       "execute_command": "echo 'vagrant'|{{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
       "inline": [
-        "[ -z \"{{user `autologin_vagrant_user`}}\" ] && exit",
+        "[ -z \"{{user `autologin_vagrant_user`}}\" ] \u0026\u0026 exit",
         "echo \"Enabling automatic GUI login for the 'vagrant' user..\"",
         "cp /private/tmp/kcpassword /private/etc/kcpassword",
         "/usr/bin/defaults write /Library/Preferences/com.apple.loginwindow autoLoginUser vagrant"
@@ -94,3 +94,4 @@
     "version": "1.1.1.dev"
   }
 }
+
