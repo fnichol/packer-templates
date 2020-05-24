@@ -101,7 +101,7 @@
       "environment_vars": [
         "BOX_BASENAME={{user `build_directory`}}/{{user `user_prefix`}}__{{user `name`}}-{{user `version`}}+git.{{user `git_revision`}}",
         "BUILD_TYPE={{build_type}}",
-        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/metadata.json",
+        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
         "VERSION={{user `version`}}"
       ],
       "script": "scripts/local/post_process.sh",
@@ -111,7 +111,7 @@
   "provisioners": [
     {
       "environment_vars": [
-        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/metadata.json",
+        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
         "_METADATA_BUILD_TIMESTAMP={{user `build_timestamp`}}",
         "_METADATA_GIT_REVISION={{user `git_revision`}}",
         "_METADATA_NAME={{user `user_prefix`}}/{{user `name`}}",
@@ -126,7 +126,7 @@
     {
       "destination": "/tmp/metadata.json",
       "generated": true,
-      "source": "packer_cache/{{build `PackerRunUUID`}}/metadata.json",
+      "source": "packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
       "type": "file"
     },
     {
