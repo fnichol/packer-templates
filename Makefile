@@ -1,4 +1,4 @@
-TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -depth 1 -not -name '*.sample.json'))
+TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -maxdepth 1 -not -name '*.sample.json'))
 CHECK_TOOLS += packer jq git
 
 PACKER_ARGS ?=
