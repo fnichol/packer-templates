@@ -1,3 +1,4 @@
+BUILD_TOOLS ?=
 CHECK_TOOLS ?=
 TEST_TOOLS ?=
 
@@ -8,6 +9,12 @@ prepush: check test ## Runs all checks/test required before pushing
 	@echo "--- $@"
 	@echo "all prepush targets passed, okay to push."
 .PHONY: prepush
+
+buildtools: ## Checks that required build tools are found on PATH
+	@echo "--- $@"
+	$(foreach tool, $(BUILD_TOOLS), $(if $(shell which $(tool)),, \
+		$(error "Required tool '$(tool)' not found on PATH")))
+.PHONY: buildtools
 
 checktools: ## Checks that required check tools are found on PATH
 	@echo "--- $@"

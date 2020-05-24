@@ -1,5 +1,5 @@
 TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -maxdepth 1 -not -name '*.sample.json'))
-CHECK_TOOLS += packer jq git
+BUILD_TOOLS += packer jq git
 
 PACKER_ARGS ?=
 
@@ -20,7 +20,7 @@ clean: clean-shell ## Cleans up project
 	rm -rf builds
 .PHONY: clean
 
-$(TEMPLATES): checktools
+$(TEMPLATES): buildtools
 	@echo "--- $@"
 	packer build -var "git_revision=$$(git show -s --format=%h)" $(PACKER_ARGS) $@
 .PHONY: $(TEMPLATES)
