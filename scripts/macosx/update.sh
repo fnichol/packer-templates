@@ -1,3 +1,3 @@
 #!/bin/sh -eux
 
-softwareupdate --install --all;
+softwareupdate --install --all
