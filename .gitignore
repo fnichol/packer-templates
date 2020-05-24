@@ -1,5 +1,6 @@
 .DS_Store
-packer_cache/
-builds/*.box
+/packer_cache/
+/builds/*.box
+/builds/*.metadata.json
 /packer-*/
 *.variables.json
