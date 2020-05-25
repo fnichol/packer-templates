@@ -1,0 +1,22 @@
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "METADATA={{user `metadata`}}",
+        "VALIDATE={{user `validate`}}"
+      ],
+      "script": "scripts/local/vagrant_cloud.sh",
+      "type": "shell-local"
+    }
+  ],
+  "variables": {
+    "metadata": null,
+    "validate": "{{env `VALIDATE`}}"
+  }
+}

@@ -1,4 +1,4 @@
-TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -maxdepth 1 -not -name '*.sample.json'))
+TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -maxdepth 1 -not -name '*.sample.json' -and -not -name vagrant-cloud.json))
 BUILD_TOOLS += packer jq git
 
 PACKER_ARGS ?=
@@ -24,3 +24,8 @@ $(TEMPLATES): buildtools
 	@echo "--- $@"
 	packer build -var "git_revision=$$(git show -s --format=%h)" $(PACKER_ARGS) $@
 .PHONY: $(TEMPLATES)
+
+upload: buildtools ## Uploads a new version to Vagrant Cloud with all provider boxes
+	@echo "--- $@"
+	packer build -var metadata=$(METADATA) vagrant-cloud.json
+.PHONY: upload
