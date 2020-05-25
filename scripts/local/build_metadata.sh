@@ -5,6 +5,7 @@ cat <<JSON >"$METADATA_FILE"
 {
   "name": "$_METADATA_NAME",
   "version": "$_METADATA_VERSION",
+  "description": "$_METADATA_DESCRIPTION",
   "build_timestamp": "$_METADATA_BUILD_TIMESTAMP",
   "git_revision": "$_METADATA_GIT_REVISION",
   "template_name": "$_METADATA_TEMPLATE_NAME",

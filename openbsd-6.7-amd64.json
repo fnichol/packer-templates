@@ -113,6 +113,7 @@
       "environment_vars": [
         "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
         "_METADATA_BUILD_TIMESTAMP={{user `build_timestamp`}}",
+        "_METADATA_DESCRIPTION={{user `description`}}",
         "_METADATA_GIT_REVISION={{user `git_revision`}}",
         "_METADATA_NAME={{user `user_prefix`}}/{{user `name`}}",
         "_METADATA_PROJECT_URL={{user `project_url`}}",
@@ -158,6 +159,7 @@
   "variables": {
     "build_directory": "builds",
     "build_timestamp": "{{isotime \"2006-01-02T15:04:05\"}}",
+    "description": "A minimal [OpenBSD](https://www.openbsd.org/) [6.7](https://www.openbsd.org/67.html) image. OpenBSD is a security-focused, free and open-source, Unix-like operating system based on the Berkeley Software Distribution (BSD).",
     "ftp_proxy": "{{env `ftp_proxy`}}",
     "git_revision": null,
     "guest_boot_wait": "20s",
