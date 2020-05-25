@@ -9,7 +9,7 @@
     {
       "environment_vars": [
         "METADATA={{user `metadata`}}",
-        "VALIDATE={{user `validate`}}"
+        "MODE={{user `mode`}}"
       ],
       "script": "scripts/local/vagrant_cloud.sh",
       "type": "shell-local"
@@ -17,6 +17,6 @@
   ],
   "variables": {
     "metadata": null,
-    "validate": "{{env `VALIDATE`}}"
+    "mode": "{{env `MODE`}}"
   }
 }

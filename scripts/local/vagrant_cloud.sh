@@ -49,15 +49,6 @@ unset PACKER_BUILD_NAME PACKER_BUILDER_TYPE PACKER_HTTP_ADDR \
   PACKER_PLUGIN_MAGIC_COOKIE PACKER_PLUGIN_MAX_PORT PACKER_PLUGIN_MIN_PORT \
   PACKER_RUN_UUID PACKER_WRAP_COOKIE
 
-case "$VALIDATE" in
-  "")
-    subcommand=build
-    ;;
-  *)
-    subcommand=validate
-    ;;
-esac
-
 jq -n \
   '{
     builders: [
@@ -85,4 +76,20 @@ jq -n \
           version_description: $version_description
         }
       ]]' \
-  | packer "$subcommand" -
+  | {
+    case "${MODE:-}" in
+      "" | build)
+        packer build -
+        ;;
+      validate)
+        packer validate -
+        ;;
+      json)
+        cat >upload.json
+        echo "Packer template generated: upload.json"
+        ;;
+      *)
+        die "Unsupported MODE='${MODE:-}' (build|validate|json)"
+        ;;
+    esac
+  }
