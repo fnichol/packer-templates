@@ -17,6 +17,10 @@ metadata() {
 
 need_cmd jq
 
+if [ -z "${VAGRANT_CLOUD_TOKEN:-}" ]; then
+  die "Environment variable VAGRANT_CLOUD_TOKEN must be set, aborting"
+fi
+
 box_tag="$(metadata .name)"
 description="$(metadata .description)"
 version="$(metadata .version)"
