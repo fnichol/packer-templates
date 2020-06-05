@@ -4,3 +4,4 @@
 /builds/*.metadata.json
 /packer-*/
 *.variables.json
+.envrc
