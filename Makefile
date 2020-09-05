@@ -17,11 +17,12 @@ check: check-shell check-json ## Checks all linting, styling, & other rules
 .PHONY: check
 
 clean: clean-shell ## Cleans up project
-	rm -rf builds
+	rm -rf builds packer-*
 .PHONY: clean
 
 $(TEMPLATES): buildtools
 	@echo "--- $@"
+	mkdir -p builds
 	packer build -var "git_revision=$$(git show -s --format=%h)" $(PACKER_ARGS) $@
 .PHONY: $(TEMPLATES)
 
