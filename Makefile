@@ -17,7 +17,7 @@ check: check-shell check-json ## Checks all linting, styling, & other rules
 .PHONY: check
 
 clean: clean-shell ## Cleans up project
-	rm -rf builds packer-*
+	rm -rf builds packer_cache packer-*
 .PHONY: clean
 
 $(TEMPLATES): buildtools
