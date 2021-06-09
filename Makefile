@@ -1,5 +1,6 @@
 TEMPLATES ?= $(patsubst ./%,%,$(shell find . -name '*.json' -maxdepth 1 -not -name '*.sample.json' -and -not -name vagrant-cloud.json))
 BUILD_TOOLS += packer jq git
+CHECK_TOOLS += packer
 
 PACKER_ARGS ?=
 
@@ -13,8 +14,18 @@ build: $(TEMPLATES) ## Builds the sources
 test: ## Runs all tests
 .PHONY: test
 
-check: check-shell check-json ## Checks all linting, styling, & other rules
+check: check-shell check-json check-template ## Checks all linting, styling, & other rules
 .PHONY: check
+
+check-template: checktools
+	@echo "--- $@"
+	@for tmpl in $(TEMPLATES); do \
+		echo "  - $$tmpl"; \
+		packer validate \
+			-var "git_revision=$$(git show -s --format=%h)" \
+			$$tmpl; \
+	done
+.PHONY: check-template
 
 clean: clean-shell ## Cleans up project
 	rm -rf builds packer_cache packer-*
