@@ -49,3 +49,6 @@ upload-all: buildtools ## Uploads all built boxes
 			$(MAKE) upload METADATA=$$metadata || break; \
 		done
 .PHONY: upload-all
+
+release-openbsd: clean openbsd-6.9-amd64.json openbsd-6.8-amd64.json upload-all ## Builds and uploads supported OpenBSD versions
+.PHONY: release-openbsd
