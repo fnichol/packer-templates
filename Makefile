@@ -41,3 +41,11 @@ upload: buildtools ## Uploads a new version to Vagrant Cloud with all provider b
 	@echo "--- $@"
 	packer build -var metadata=$(METADATA) vagrant-cloud.json
 .PHONY: upload
+
+upload-all: buildtools ## Uploads all built boxes
+	@echo "--- $@"
+	@find builds -name '*.metadata.json' -type f \
+		| while read -r metadata; do \
+			$(MAKE) upload METADATA=$$metadata || break; \
+		done
+.PHONY: upload-all
