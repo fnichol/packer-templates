@@ -1,22 +1,24 @@
 {
   "builders": [
     {
-      "boot_wait": "2s",
-      "disk_size": 20480,
+      "boot_wait": "{{user `guest_boot_wait`}}",
+      "cpus": "{{user `guest_cpus`}}",
+      "disk_size": "{{user `guest_disk_size`}}",
       "guest_os_type": "darwin12-64",
-      "iso_checksum": "{{user `iso_checksum`}}",
-      "iso_checksum_type": "md5",
+      "iso_checksum": "md5:{{user `iso_checksum`}}",
       "iso_url": "{{user `iso_url`}}",
+      "memory": "{{user `guest_memory`}}",
       "output_directory": "packer-{{user `name`}}-vmware",
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -h now",
       "skip_compaction": true,
       "ssh_password": "vagrant",
       "ssh_port": 22,
+      "ssh_timeout": "10000s",
       "ssh_username": "vagrant",
-      "ssh_wait_timeout": "10000s",
       "tools_upload_flavor": "darwin",
       "tools_upload_path": "/tmp/vmtools.iso",
       "type": "vmware-iso",
+      "usb": true,
       "vm_name": "packer-{{user `name`}}",
       "vmx_data": {
         "cpuid.coresPerSocket": "1",
@@ -25,10 +27,7 @@
         "hpet0.present": "TRUE",
         "ich7m.present": "TRUE",
         "keyboardAndMouseProfile": "macProfile",
-        "memsize": "3072",
-        "numvcpus": "1",
-        "smc.present": "TRUE",
-        "usb.present": "TRUE"
+        "smc.present": "TRUE"
       }
     }
   ],
@@ -82,10 +81,14 @@
     "autologin_vagrant_user": "",
     "ftp_proxy": "{{env `ftp_proxy`}}",
     "git_sha": "unset",
+    "guest_boot_wait": "2s",
+    "guest_cpus": "2",
+    "guest_disk_size": "20480",
+    "guest_memory": "3072",
     "home_dir": "/Users/vagrant",
     "http_proxy": "{{env `http_proxy`}}",
     "https_proxy": "{{env `https_proxy`}}",
-    "iso_checksum": "nopenopenope",
+    "iso_checksum": "0000",
     "iso_url": "http://YOU-MUST-PROVIDE-YOUR-OWN-DMG.sorry",
     "name": "macosx-10.7",
     "no_proxy": "{{env `no_proxy`}}",
