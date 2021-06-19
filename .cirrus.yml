@@ -1,5 +1,14 @@
 check_task:
   container:
     image: fnichol/check-shell:latest
-  setup_script: apk add jq
+  setup_script: |
+    apk add jq git
+
+    # Install latest release of Packer
+    platurl=https://api.github.com/repos/hashicorp/packer/releases/latest
+    pver="$(wget -O - "$platurl" 2>/dev/null | jq -r .tag_name | sed 's/^v//')"
+    dlurl="https://releases.hashicorp.com/packer/$pver/packer_${pver}_linux_amd64.zip"
+    wget -P /tmp "$dlurl"
+    unzip -d /usr/local/bin "/tmp/$(basename "$dlurl")"
+    rm -f "/tmp/$(basename "$dlurl")"
   check_script: make check
