@@ -14,8 +14,8 @@ need_cmd() {
 checksum() {
   case "$(uname -s)" in
     Darwin)
-      need_cmd shasum
-      shasum -a 256 "$@" | cut -d ' ' -f 1
+      need_cmd /usr/bin/shasum
+      /usr/bin/shasum -a 256 "$@" | cut -d ' ' -f 1
       ;;
     *)
       need_cmd sha256sum
