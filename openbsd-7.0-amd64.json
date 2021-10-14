@@ -1,0 +1,187 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "S<enter>",
+        "cat <<INSTALL_CONF_EOF >install.conf<enter>",
+        "System hostname = {{user `hostname`}}<enter>",
+        "Do you expect to run the X Window System = no<enter>",
+        "Password for root = vagrant<enter>",
+        "Setup a user = vagrant<enter>",
+        "Password for user = vagrant<enter>",
+        "What timezone are you in = UTC<enter>",
+        "Location of sets = http<enter>",
+        "HTTP proxy URL = {{user `http_proxy`}}<enter>",
+        "HTTP server = {{user `mirror_server`}}<enter>",
+        "Server directory = {{user `mirror_directory`}}<enter>",
+        "Unable to connect using https. Use http instead = yes<enter>",
+        "Set name(s) = -game*.tgz -x*.tgz<enter>",
+        "INSTALL_CONF_EOF<enter>",
+        "cat <<INSTALL_SH_EOF >install.sh<enter>",
+        "install -af install.conf;<enter>",
+        "echo 'permit nopass keepenv :wheel' >>/mnt/etc/doas.conf;<enter>",
+        "echo 'https://cdn.openbsd.org/pub/OpenBSD' >/mnt/etc/installurl;<enter>",
+        "reboot;<enter>",
+        "INSTALL_SH_EOF<enter>",
+        "sh -eux install.sh<enter>"
+      ],
+      "boot_wait": "{{user `guest_boot_wait`}}",
+      "cpus": "{{user `guest_cpus`}}",
+      "disk_size": "{{user `guest_disk_size`}}",
+      "guest_additions_mode": "disable",
+      "guest_os_type": "OpenBSD_64",
+      "headless": "{{user `guest_headless`}}",
+      "iso_checksum": "sha256:{{user `iso_checksum`}}",
+      "iso_url": "{{user `mirror_scheme`}}://{{user `mirror_server`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "memory": "{{user `guest_memory`}}",
+      "output_directory": "packer-{{user `name`}}-virtualbox",
+      "shutdown_command": "doas /sbin/halt -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "10000s",
+      "ssh_username": "vagrant",
+      "type": "virtualbox-iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-{{user `name`}}"
+    },
+    {
+      "boot_command": [
+        "S<enter>",
+        "cat <<INSTALL_CONF_EOF >install.conf<enter>",
+        "System hostname = {{user `hostname`}}<enter>",
+        "Do you expect to run the X Window System = no<enter>",
+        "Password for root = vagrant<enter>",
+        "Setup a user = vagrant<enter>",
+        "Password for user = vagrant<enter>",
+        "What timezone are you in = UTC<enter>",
+        "Location of sets = http<enter>",
+        "HTTP proxy URL = {{user `http_proxy`}}<enter>",
+        "HTTP server = {{user `mirror_server`}}<enter>",
+        "Server directory = {{user `mirror_directory`}}<enter>",
+        "Unable to connect using https. Use http instead = yes<enter>",
+        "Set name(s) = -game*.tgz -x*.tgz<enter>",
+        "INSTALL_CONF_EOF<enter>",
+        "cat <<INSTALL_SH_EOF >install.sh<enter>",
+        "install -af install.conf;<enter>",
+        "echo 'permit nopass keepenv :wheel' >>/mnt/etc/doas.conf;<enter>",
+        "echo 'https://cdn.openbsd.org/pub/OpenBSD' >/mnt/etc/installurl;<enter>",
+        "reboot;<enter>",
+        "INSTALL_SH_EOF<enter>",
+        "sh -eux install.sh<enter>"
+      ],
+      "boot_wait": "{{user `guest_boot_wait`}}",
+      "cpus": "{{user `guest_cpus`}}",
+      "disk_size": "{{user `guest_disk_size`}}",
+      "guest_os_type": "other-64",
+      "headless": "{{user `guest_headless`}}",
+      "iso_checksum": "sha256:{{user `iso_checksum`}}",
+      "iso_url": "{{user `mirror_scheme`}}://{{user `mirror_server`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "memory": "{{user `guest_memory`}}",
+      "output_directory": "packer-{{user `name`}}-vmware",
+      "shutdown_command": "doas /sbin/halt -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "10000s",
+      "ssh_username": "vagrant",
+      "type": "vmware-iso",
+      "vm_name": "packer-{{user `name`}}",
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1"
+      }
+    }
+  ],
+  "min_packer_version": "1.6.0",
+  "post-processors": [
+    {
+      "output": "{{user `build_directory`}}/{{user `user_prefix`}}__{{user `name`}}-{{user `version`}}+git.{{user `git_revision`}}.{{.Provider}}.box",
+      "type": "vagrant",
+      "vagrantfile_template": "vagrantfile_templates/openbsd.rb"
+    },
+    {
+      "environment_vars": [
+        "BOX_BASENAME={{user `build_directory`}}/{{user `user_prefix`}}__{{user `name`}}-{{user `version`}}+git.{{user `git_revision`}}",
+        "BUILD_TYPE={{build_type}}",
+        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
+        "VERSION={{user `version`}}"
+      ],
+      "script": "scripts/local/post_process.sh",
+      "type": "shell-local"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "METADATA_FILE=packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
+        "_METADATA_BUILD_TIMESTAMP={{user `build_timestamp`}}",
+        "_METADATA_DESCRIPTION={{user `description`}}",
+        "_METADATA_GIT_REVISION={{user `git_revision`}}",
+        "_METADATA_NAME={{user `user_prefix`}}/{{user `name`}}",
+        "_METADATA_PROJECT_URL={{user `project_url`}}",
+        "_METADATA_SOURCE_URL={{user `project_url`}}/blob/{{user `git_revision`}}/{{user `template_name`}}.json",
+        "_METADATA_TEMPLATE_NAME={{user `template_name`}}",
+        "_METADATA_VERSION={{user `version`}}"
+      ],
+      "script": "scripts/local/build_metadata.sh",
+      "type": "shell-local"
+    },
+    {
+      "destination": "/tmp/metadata.json",
+      "generated": true,
+      "source": "packer_cache/{{build `PackerRunUUID`}}/{{build_type}}-metadata.json",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "HOME_DIR={{user `home_dir`}}",
+        "MIRROR={{user `mirror_scheme`}}://{{user `mirror_server`}}/{{user `mirror_directory`}}",
+        "ftp_proxy={{user `ftp_proxy`}}",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "MINIMIZE_FILESYSTEMS={{user `minimize_filesystems`}}",
+        "no_proxy={{user `no_proxy`}}"
+      ],
+      "execute_command": "doas env {{.Vars}} sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "pause_before": "5s",
+      "scripts": [
+        "scripts/openbsd/wait_on_firsttime.sh",
+        "scripts/common/metadata.sh",
+        "scripts/openbsd/update.sh",
+        "scripts/openbsd/wait_on_boot.sh",
+        "scripts/openbsd/nfsd.sh",
+        "scripts/common/vagrant.sh",
+        "scripts/openbsd/wait_on_reorder_kernel.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "build_directory": "builds",
+    "build_timestamp": "{{isotime \"2006-01-02T15:04:05\"}}",
+    "description": "A minimal [OpenBSD](https://www.openbsd.org/) [7.0](https://www.openbsd.org/70.html) image. OpenBSD is a security-focused, free and open-source, Unix-like operating system based on the Berkeley Software Distribution (BSD).",
+    "ftp_proxy": "{{env `ftp_proxy`}}",
+    "git_revision": null,
+    "guest_boot_wait": "20s",
+    "guest_cpus": "2",
+    "guest_disk_size": "40960",
+    "guest_headless": "true",
+    "guest_memory": "384",
+    "home_dir": "/home/vagrant",
+    "hostname": "openbsd-70",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "iso_checksum": "3e3e21b1aa4448cffba103f954b3604c69361ca1fe9a4e15287fc7298171b11f",
+    "iso_name": "cd70.iso",
+    "minimize_filesystems": "/ /tmp /var /usr /usr/X11R6 /usr/local /usr/src /usr/obj /home",
+    "mirror_directory": "pub/OpenBSD/7.0/amd64",
+    "mirror_scheme": "https",
+    "mirror_server": "cdn.openbsd.org",
+    "name": "openbsd-7.0",
+    "no_proxy": "{{env `no_proxy`}}",
+    "project_url": "https://github.com/fnichol/packer-templates",
+    "template_name": "openbsd-7.0-amd64",
+    "user_prefix": "fnichol",
+    "version": "{{isotime \"20060102.1504\"}}.0"
+  }
+}
