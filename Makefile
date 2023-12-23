@@ -50,8 +50,11 @@ upload-all: buildtools ## Uploads all built boxes
 		done
 .PHONY: upload-all
 
-release-openbsd: clean openbsd-7.3-amd64.json openbsd-7.2-amd64.json upload-all ## Builds and uploads supported OpenBSD versions
+release-openbsd: clean openbsd-7.4-amd64.json openbsd-7.3-amd64.json upload-all ## Builds and uploads supported OpenBSD versions
 .PHONY: release-openbsd
+
+release-openbsd-7.4: clean openbsd-7.4-amd64.json upload-all ## Builds and uploads OpenBSD 7.4 boxes
+.PHONY: release-openbsd-7.4
 
 release-openbsd-7.3: clean openbsd-7.3-amd64.json upload-all ## Builds and uploads OpenBSD 7.3 boxes
 .PHONY: release-openbsd-7.3
